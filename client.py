@@ -6,6 +6,7 @@ import multiprocessing
 import select
 import sys
 import json
+from client_functions import functions
 
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65432      # Port to listen on (non-privileged ports are > 1023)
@@ -60,11 +61,25 @@ def openShellLinux():
                 os.write(master, data.encode())
                 time.sleep(0.001)
 
-def parseCommand(rawCommand):
-    pass
+def parseCommand(clientsocket, rawCommand):
+    print(rawCommand)
+    command = {}
+    try:
+        command = json.loads(rawCommand)
+    except:
+        print("Invalid json")
+        return
 
-def executeCommand(command):
-    pass
+    executeCommand(clientsocket, command["cmd"], command["args"])
+
+def executeCommand(clientsocket, command, args):
+    temp = functions[command](args)
+    returnTemp= json.dumps(temp)
+    returnData = {}
+    returnData["command"] = command
+    returnData["data"] = returnTemp
+    returnData = json.dumps(returnData)
+    clientsocket.sendall(returnData.encode())
 
 def commandLoop():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as clientsocket:
@@ -77,13 +92,16 @@ def commandLoop():
                 print("Connection interrupted")
                 break
             else:
-                print(data)
+                #  try:
+                parseCommand(clientsocket, data)
+                #  except:
+                    #  print("Invalid command")
                 time.sleep(0.001)
 
 
 
 def main():
-   openShellLinux()
+   commandLoop()
 
 if __name__ == "__main__":
     main()
