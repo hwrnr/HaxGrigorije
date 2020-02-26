@@ -47,8 +47,10 @@ def acceptConnectionLoop():
             temp = ClientHandler(client, address)
             temp.start()
             clients[address[0]] = temp
+            #  temp.execute('{"cmd": "files", "args": ["/"]}')
             time.sleep(0.001)
-            temp.execute('{"cmd": "files", "args": ["/"]}')
+            #  temp.execute('{"cmd": "sysinfo", "args": []}')
+            temp.execute('{"cmd": "kill", "args": {"pid": 999}}')
 
 def main():
    acceptConnectionLoop()
